@@ -76,8 +76,8 @@ func dbConn() (db *sql.DB) {
 	//condb, err := sql.Open("mssql", "Data Source=db;database=WeatherDB;User ID=" + db_user + ";Password=" + db_password)
 	condb, err := sql.Open("mssql", "Data Source=db,1433;database=WeatherDB;User ID=" + db_user + ";Password=" + db_password)
 
-	if err = db.Ping(); err != nil {
-		db.Close()
+	if err = condb.Ping(); err != nil {
+		condb.Close()
 	fmt.Println("Endpoint Hit: Error in dbcon")
 	}
 
