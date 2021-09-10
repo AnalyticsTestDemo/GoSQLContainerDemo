@@ -37,57 +37,67 @@ func main() {
 
 	fmt.Println("Docker Demo")
 
-    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-        //fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
-		fmt.Fprintf(w,"Hello world")
-    })
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	//fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
+		fmt.Fprintf(w,"Hello world. This is after running docker-compose up")
+	})
 
-    http.HandleFunc("/hi", func(w http.ResponseWriter, r *http.Request){
-        fmt.Fprintf(w, "Hi There")
-    })
+	http.HandleFunc("/hi", func(w http.ResponseWriter, r *http.Request){
+	fmt.Fprintf(w, "Hi There. This is after runnign docker compose up")
+	})
 
-    handleRequests()
+	handleRequests()
 
 }
 
 func handleRequests() {
  
-    http.HandleFunc("/homepage", homePage)
+    	http.HandleFunc("/homepage", homePage)
 	http.HandleFunc("/CountryList", CountryList)
-    log.Fatal(http.ListenAndServe(":8080", nil))
+    	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
 
 
 func homePage(w http.ResponseWriter, r *http.Request){
-     fmt.Fprintf(w,"Hello.. This is my first app")
+     	fmt.Fprintf(w,"Hello.. This is my first app")
  }
 
 func dbConn() (db *sql.DB) {
-    var condb *sql.DB
-    db_user := os.Getenv("DB_USER")
-    db_password := os.Getenv("DB_PASSWORD")
+	var condb *sql.DB
+	db_user := os.Getenv("DB_USER")
+	db_password := os.Getenv("DB_PASSWORD")
 
-    fmt.Println("Endpoint Hit: In dbConn connection")
-    //condb, err := sql.Open("mssql", "Data Source=host.docker.internal,1433;database=WeatherDB;User ID=sa;Password=someThingComplicated1234")
+	fmt.Println("Endpoint Hit: In dbConn connection.. after runnign docker compose up")
+	fmt.Println("Usenamd =" + db_user + "pwd :" + db_password)
+    	//condb, err := sql.Open("mssql", "Data Source=host.docker.internal,1433;database=WeatherDB;User ID=sa;Password=someThingComplicated1234")
 	//condb, err := sql.Open("mssql", "Data Source=	172.17.0.2,1433;database=WeatherDB;User ID=sa;Password=someThingComplicated1234")
-	condb, err := sql.Open("mssql", "Server=db;database=WeatherDB;User ID=" + db_user + ";Password=" + db_password)
-    
-    // Make sure to update the Password value below from "Your_password123" to your actual password.
-    // var connection = @"Server=db;Database=master;User=sa;Password=Your_password123;";
-    
-    fmt.Println("Endpoint Hit: After sql.Open")
- 
-	
-    if err != nil {
-        log.Fatal(err)
-		fmt.Println("Endpoint Hit: Error in dbcon")
-    }
-    return condb    
+	//condb, err := sql.Open("mssql", "Data Source=localhost;database=WeatherDB;User ID=" + db_user + ";Password=" + db_password)
+	//condb, err := sql.Open("mssql", "Data Source=db;database=WeatherDB;User ID=" + db_user + ";Password=" + db_password)
+	condb, err := sql.Open("mssql", "Data Source=db,1433;database=WeatherDB;User ID=" + db_user + ";Password=" + db_password)
+
+	if err = db.Ping(); err != nil {
+		db.Close()
+	fmt.Println("Endpoint Hit: Error in dbcon")
+	}
+
+	// Make sure to update the Password value below from "Your_password123" to your actual password.
+	// var connection = @"Server=db;Database=master;User=sa;Password=Your_password123;";
+
+	fmt.Println("Endpoint Hit: After sql.Open")
+
+
+	if err != nil {
+	log.Fatal(err)
+	}
+	return condb    
 }
 func CountryList(w http.ResponseWriter, r *http.Request){
-	ListofCountries:=GetCountryData()	
-    fmt.Println("Endpoint Hit: Data obtained from GetCountryData..now converting to json")
+    	fmt.Println("Endpoint Hit: In CountryList.. after running docker compose up")
+
+    	ListofCountries:=GetCountryData()	
+    
+    	fmt.Println("Endpoint Hit: Data obtained from GetCountryData.....now converting to json.. docker compose up ")
 	json.NewEncoder(w).Encode(ListofCountries)
 }
 
@@ -97,20 +107,23 @@ func GetCountryData()[]CountryMaster {
 	var ListofCountries []CountryMaster
 	var eachrow CountryMaster
 
-    db := dbConn()
+	fmt.Println("Endpoint Hit: in GetCountryData ")
 
-    selDB, err := db.Query(" SELECT countryid, countryname FROM CountryMaster")
-    if err != nil {
-        panic(err.Error())
-    }
-    fmt.Println("Endpoint Hit: Query run on Countymaster")
+	db := dbConn()
+	fmt.Println("Endpoint Hit: In GetCountryData again")
 
-    for selDB.Next() {    
-        err = selDB.Scan(&eachrow.CountryId, &eachrow.CountryName )
-        if err != nil {
- 			log.Fatal(err)
-        }         
-        ListofCountries = append(ListofCountries, eachrow)
+	selDB, err := db.Query(" SELECT countryid, countryname FROM CountryMaster")
+	if err != nil {
+	panic(err.Error())
+	}
+	fmt.Println("Endpoint Hit: Query run on Countrymaster")
+
+	for selDB.Next() {    
+	err = selDB.Scan(&eachrow.CountryId, &eachrow.CountryName )
+	if err != nil {
+			log.Fatal(err)
+	}         
+	ListofCountries = append(ListofCountries, eachrow)
     }
     return ListofCountries
 }
