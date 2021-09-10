@@ -1,0 +1,42 @@
+version: '3'
+services:
+  db:
+    image: "mcr.microsoft.com/mssql/server"
+    environment:
+        SA_PASSWORD: "someThingComplicated1234"
+        ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - ./Weatherdata.sql:/docker-entrypoint-initdb.d/Weatherdata.sql
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      DB_USER: "sa"
+      DB_PASSWORD: "someThingComplicated1234"
+    depends_on:
+      - "db"
+    ports:
+      - "8080:8080"
+
+      #########
+
+#version: '3'
+#services:
+#  db:
+#     image: 56beb1db7406
+#     container_name: vmsql_server
+#     #restart: always
+#    # environment:
+#    #    - MYSQL_ROOT_PASSWORD="secret"
+#  web:
+#    image: 842c6bfaea2c
+#    build: .
+#    container_name: 6b6c63d17bfc
+#    restart: always
+#    ports:
+#      - "8080:99"
